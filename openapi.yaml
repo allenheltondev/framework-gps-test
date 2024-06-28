@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: GPS Data API
+  version: 1.0.0
+
+tags:
+  - name: Session
+    description: Session management endpoints
+  - name: Data
+    description: Data management endpoints
+
+paths:
+  /sessions:
+    post:
+      tags: [Session]
+      summary: Create a new session for GPS tracking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '201':
+          description: Session created
+        '400':
+          description: Invalid request body
+        '500':
+          description: Internal server error
+    get:
+      tags: [Session]
+      summary: Get all sessions
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessionList'
+        '500':
+          description: Internal server error
+
+  /sessions/{sessionId}:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      tags: [Session]
+      summary: Get a session by id
+      responses:
+        '200':
+          description: Session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetail'
+        '404':
+          description: Session not found
+        '500':
+          description: Internal server error
+    put:
+      tags: [Session]
+      summary: Update session details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionUpdate'
+      responses:
+        '204':
+          description: Session updated
+        '400':
+          description: Invalid request body or session ID
+        '404':
+          description: Session not found
+        '500':
+          description: Internal server error
+    delete:
+      tags: [Session]
+      summary: Delete a session by ID
+      responses:
+        '204':
+          description: Session deleted
+        '404':
+          description: Session not found
+        '500':
+          description: Internal server error
+
+  /sessions/{sessionId}/data:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    post:
+      tags: [Data]
+      summary: Add GPS data to a session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Data'
+      responses:
+        '201':
+          description: Data added to session
+        '400':
+          description: Invalid request body or session ID
+        '404':
+          description: Session not found
+        '500':
+          description: Internal server error
+    get:
+      tags: [Data]
+      summary: Get all GPS data for a session in chronological order
+      responses:
+        '200':
+          description: List of GPS data for the session
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataDetail'
+        '404':
+          description: Session not found
+        '500':
+          description: Internal server error
+
+components:
+  parameters:
+    sessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    Session:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+    SessionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/SessionDetail'
+
+    SessionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+
+    SessionDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, inactive]
+
+    Data:
+      type: object
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+
+    DataDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+        longitude:
+          type: number
